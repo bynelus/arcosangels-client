@@ -34,7 +34,7 @@ final class StravaController {
 		return req.redirect(to: "https://www.strava.com/oauth/authorize?client_id=44626&response_type=code&redirect_uri=\(callbackUrl)&approval_prompt=force&scope=read,activity:read_all")
 	}
 	
-	func connectCallback(_ req: Request) throws -> Future<HTTPStatus> {
+	func connectCallback(_ req: Request) throws -> Future<Response> {
 		guard let code = req.query[String.self, at: "code"],
 			let scope = req.query[String.self, at: "scope"],
 			scope.contains("activity:read_all")
@@ -49,7 +49,9 @@ final class StravaController {
 			return try response.content.decode(AccessToken.Result.self)
 		}.flatMap(to: StravaUser.self) { content in
 			return StravaUser(id: content.athlete.id, firstName: content.athlete.firstname, lastName: content.athlete.lastname, refreshToken: content.refresh_token).create(orUpdate: true, on: req)
-		}.transform(to: .ok)
+		}.map { user in
+			return req.redirect(to: "/update")
+		}
 	}
 	
 	func update(_ req: Request) throws -> Future<HTTPStatus> {
