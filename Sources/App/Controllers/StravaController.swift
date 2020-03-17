@@ -64,7 +64,7 @@ final class StravaController {
 	}
 	
 	func json(_ req: Request) throws -> Future<[UserSummary]> {
-		return UserSummary.query(on: req).sort(\.runTotalDistance, .descending).all()
+		return UserSummary.query(on: req).all()
 	}
 }
 
