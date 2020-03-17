@@ -63,8 +63,17 @@ final class StravaController {
 		}.transform(to: .ok)
 	}
 	
+	func clean(_ req: Request) throws -> Future<HTTPStatus> {
+		let deleteAll: EventLoopFuture<[Void]> = UserSummary.query(on: req).all().flatMap { list in
+			let flatten = list.map { $0.delete(on: req) }
+			return flatten.flatten(on: req)
+		}
+		
+		return deleteAll.transform(to: .ok)
+	}
+	
 	func json(_ req: Request) throws -> Future<[UserSummary]> {
-		return UserSummary.query(on: req).all()
+		return UserSummary.query(on: req).sort(\.runTotalDistance, .descending).all()
 	}
 }
 
@@ -85,14 +94,14 @@ extension StravaController {
 			let running = activities.filter { $0.type == "Run" }
 			let runningDistance = running.reduce(0.0) { $0 + $1.distance }
 			let runningTime = running.reduce(0) { $0 + $1.moving_time }
-			let runningDistanceAverage = runningDistance / Double(running.count)
-			let runningMovingTimeAverage = Double(runningTime) / Double(running.count)
+			let runningDistanceAverage = running.isEmpty ? 0.0 : runningDistance / Double(running.count)
+			let runningMovingTimeAverage = running.isEmpty ? 0.0 : Double(runningTime) / Double(running.count)
 			
 			let ride = activities.filter { $0.type == "Ride" }
 			let rideDistance = ride.reduce(0.0) { $0 + $1.distance }
 			let rideTime = ride.reduce(0) { $0 + $1.moving_time }
-			let rideDistanceAverage = rideDistance / Double(ride.count)
-			let rideMovingTimeAverage = Double(rideTime) / Double(ride.count)
+			let rideDistanceAverage = ride.isEmpty ? 0.0 : rideDistance / Double(ride.count)
+			let rideMovingTimeAverage = ride.isEmpty ? 0.0 : Double(rideTime) / Double(ride.count)
 			
 			return UserSummary(id: user.id,
 							   firstName: user.firstName,
