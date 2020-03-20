@@ -27,7 +27,6 @@ struct RefreshToken {
 	}
 }
 
-
 final class StravaController {
 	func connect(_ req: Request) throws -> Response {
 		let callbackUrl = appUrl + "connectcallback"
@@ -60,6 +59,8 @@ final class StravaController {
 		return users.flatMap(to: [UserSummary].self) { list in
 			let mapped = try list.map { try self.createRefreshRequest(req: req, user: $0) }
 			return mapped.flatten(on: req)
+		}.flatMap { userSummaries in
+			return try req.client().post("https://api.netlify.com/build_hooks/5e726fd5f5621a89310045c7")
 		}.transform(to: .ok)
 	}
 	
@@ -89,7 +90,7 @@ extension StravaController {
 			return try req.client().get(url, headers: ["Authorization": "Bearer " + content.access_token])
 		}.flatMap(to: [StravaActivity].self) { response in
 			return try response.content.decode([StravaActivity].self)
-		}.flatMap(to: UserSummary.self) { activities in
+		}.flatMap(to: UserSummary.self) { [weak self] activities in
 			
 			let running = activities.filter { $0.type == "Run" }
 			let runningDistance = running.reduce(0.0) { $0 + $1.distance }
@@ -104,8 +105,8 @@ extension StravaController {
 			let rideMovingTimeAverage = ride.isEmpty ? 0.0 : Double(rideTime) / Double(ride.count)
 			
 			return UserSummary(id: user.id,
-							   firstName: user.firstName,
-							   lastName: user.lastName,
+							   firstName: self?.map(firstName: user.firstName, lastName: user.lastName) ?? user.firstName,
+							   lastName: "",
 							   runTotalActivities: running.count,
 							   runTotalDistance: runningDistance,
 							   runTotalMovingTime: runningTime,
@@ -117,5 +118,21 @@ extension StravaController {
 							   rideAverageDistance: rideDistanceAverage,
 							   rideAverageMovingTime: rideMovingTimeAverage).create(orUpdate: true, on: req)
 		}
+	}
+}
+
+extension StravaController {
+	func map(firstName: String, lastName: String) -> String {
+		switch lastName {
+		case "Poot", "Koole": return lastName
+		default: break
+		}
+		
+		switch firstName {
+		case "Luuk": return "Haas"
+		default: break
+		}
+		
+		return firstName
 	}
 }
