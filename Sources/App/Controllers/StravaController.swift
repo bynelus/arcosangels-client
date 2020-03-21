@@ -1,32 +1,5 @@
 import Vapor
 
-struct AccessToken {
-	struct Payload: Content {
-		let client_id = "44626"
-		let client_secret = "8e317109af109e8b542d902c88579a2274d5cf94"
-		let grant_type = "authorization_code"
-		let code: String
-	}
-	
-	struct Result: Content {
-		let refresh_token: String
-		let athlete: StravaAthlete
-	}
-}
-
-struct RefreshToken {
-	struct Payload: Content {
-		let client_id = "44626"
-		let client_secret = "8e317109af109e8b542d902c88579a2274d5cf94"
-		let grant_type = "refresh_token"
-		let refresh_token: String
-	}
-	
-	struct Result: Content {
-		let access_token: String
-	}
-}
-
 final class StravaController {
 	func connect(_ req: Request) throws -> Response {
 		let callbackUrl = appUrl + "connectcallback"
@@ -40,12 +13,12 @@ final class StravaController {
 			else { throw Abort(.badRequest) }
 	
 		let request = try req.client().post("https://www.strava.com/oauth/token", beforeSend: { req in
-			let payload = AccessToken.Payload(code: code)
+			let payload = StravaAccessTokenRequest.Payload(code: code)
 			try req.content.encode(payload, as: .json)
 		})
 		
 		return request.flatMap { response in
-			return try response.content.decode(AccessToken.Result.self)
+			return try response.content.decode(StravaAccessTokenRequest.Result.self)
 		}.flatMap(to: StravaUser.self) { content in
 			return StravaUser(id: content.athlete.id, firstName: content.athlete.firstname, lastName: content.athlete.lastname, refreshToken: content.refresh_token).create(orUpdate: true, on: req)
 		}.map { user in
@@ -73,24 +46,27 @@ final class StravaController {
 		return deleteAll.transform(to: .ok)
 	}
 	
-	func json(_ req: Request) throws -> Future<[UserSummary]> {
-		return UserSummary.query(on: req).sort(\.runTotalDistance, .descending).all()
+	func json(_ req: Request) throws -> Future<[DetailedUserModel]> {
+		return UserSummary.query(on: req)
+			.sort(\.runTotalDistance, .descending)
+			.all()
+			.map { $0.map { DetailedUserModelMapper.map($0) } }
 	}
 }
 
 extension StravaController {
 	func createRefreshRequest(req: Request, user: StravaUser) throws -> EventLoopFuture<UserSummary> {
 		return try req.client().post("https://www.strava.com/oauth/token", beforeSend: { req in
-			let payload = RefreshToken.Payload(refresh_token: user.refreshToken)
+			let payload = StravaRefreshTokenRequest.Payload(refresh_token: user.refreshToken)
 			try req.content.encode(payload, as: .json)
-		}).flatMap(to: RefreshToken.Result.self) { response in
-			return try response.content.decode(RefreshToken.Result.self)
+		}).flatMap(to: StravaRefreshTokenRequest.Result.self) { response in
+			return try response.content.decode(StravaRefreshTokenRequest.Result.self)
 		}.flatMap(to: Response.self) { content in
 			let url = "https://www.strava.com/api/v3/athlete/activities?after=1577836800&before=1609459200&per_page=200"
 			return try req.client().get(url, headers: ["Authorization": "Bearer " + content.access_token])
 		}.flatMap(to: [StravaActivity].self) { response in
 			return try response.content.decode([StravaActivity].self)
-		}.flatMap(to: UserSummary.self) { [weak self] activities in
+		}.flatMap(to: UserSummary.self) { activities in
 			
 			let running = activities.filter { $0.type == "Run" }
 			let runningDistance = running.reduce(0.0) { $0 + $1.distance }
@@ -105,8 +81,8 @@ extension StravaController {
 			let rideMovingTimeAverage = ride.isEmpty ? 0.0 : Double(rideTime) / Double(ride.count)
 			
 			return UserSummary(id: user.id,
-							   firstName: self?.map(firstName: user.firstName, lastName: user.lastName) ?? user.firstName,
-							   lastName: "",
+							   firstName: user.firstName,
+							   lastName: user.lastName,
 							   runTotalActivities: running.count,
 							   runTotalDistance: runningDistance,
 							   runTotalMovingTime: runningTime,
@@ -118,21 +94,5 @@ extension StravaController {
 							   rideAverageDistance: rideDistanceAverage,
 							   rideAverageMovingTime: rideMovingTimeAverage).create(orUpdate: true, on: req)
 		}
-	}
-}
-
-extension StravaController {
-	func map(firstName: String, lastName: String) -> String {
-		switch lastName {
-		case "Poot", "Koole": return lastName
-		default: break
-		}
-		
-		switch firstName {
-		case "Luuk": return "Haas"
-		default: break
-		}
-		
-		return firstName
 	}
 }
