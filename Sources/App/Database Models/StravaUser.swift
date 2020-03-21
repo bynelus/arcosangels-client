@@ -6,12 +6,14 @@ final class StravaUser: PostgreSQLModel {
 	var firstName: String
 	var lastName: String
 	var refreshToken: String
+	var isFan: Bool
 
-    init(id: Int? = nil, firstName: String, lastName: String, refreshToken: String) {
+	init(id: Int? = nil, firstName: String, lastName: String, refreshToken: String, isFan: Bool) {
         self.id = id
         self.firstName = firstName
 		self.lastName = lastName
         self.refreshToken = refreshToken
+		self.isFan = isFan
     }
 }
 

@@ -5,6 +5,7 @@ final class UserSummary: PostgreSQLModel {
     var id: Int?
 	var firstName: String
 	var lastName: String
+	var isFan: Bool
 	
 	var runTotalActivities: Int
 	var runTotalDistance: Double
@@ -18,10 +19,11 @@ final class UserSummary: PostgreSQLModel {
 	var rideAverageDistance: Double
 	var rideAverageMovingTime: Double
 
-	init(id: Int? = nil, firstName: String, lastName: String, runTotalActivities: Int, runTotalDistance: Double, runTotalMovingTime: Int, runAverageDistance: Double, runAverageMovingTime: Double, rideTotalActivities: Int, rideTotalDistance: Double, rideTotalMovingTime: Int, rideAverageDistance: Double, rideAverageMovingTime: Double) {
+	init(id: Int? = nil, firstName: String, lastName: String, isFan: Bool, runTotalActivities: Int, runTotalDistance: Double, runTotalMovingTime: Int, runAverageDistance: Double, runAverageMovingTime: Double, rideTotalActivities: Int, rideTotalDistance: Double, rideTotalMovingTime: Int, rideAverageDistance: Double, rideAverageMovingTime: Double) {
         self.id = id
         self.firstName = firstName
 		self.lastName = lastName
+		self.isFan = isFan
 		
         self.runTotalActivities = runTotalActivities
         self.runTotalDistance = runTotalDistance
