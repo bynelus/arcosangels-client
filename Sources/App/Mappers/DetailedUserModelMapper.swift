@@ -5,7 +5,7 @@ final class DetailedUserModelMapper {
 		let name = mapName(firstName: model.firstName, lastName: model.lastName)
 		
 		guard model.runTotalActivities > 0 else {
-			return DetailedUserModel(name: name, hasData: true, totalRuns: "0", averageRunDistance: "0", averageRunMinutePerKM: "00:00", totalRunDistance: "0")
+			return DetailedUserModel(name: name, hasData: false, totalRuns: "0", averageRunDistance: "0", averageRunMinutePerKM: "00:00", totalRunDistance: "0")
 		}
 		
 		let totalRuns = "\(model.runTotalActivities)"
