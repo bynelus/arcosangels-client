@@ -3,11 +3,16 @@ import Vapor
 final class DetailedUserModelMapper {
 	static func map(_ model: UserSummary) -> DetailedUserModel {
 		let name = mapName(firstName: model.firstName, lastName: model.lastName)
+		
+		guard model.runTotalActivities > 0 else {
+			return DetailedUserModel(name: name, hasData: true, totalRuns: "0", averageRunDistance: "0", averageRunMinutePerKM: "00:00", totalRunDistance: "")
+		}
+		
 		let totalRuns = "\(model.runTotalActivities)"
 		let averageRunDistance = (model.runAverageDistance / 1000).round(with: 2).replacingOccurrences(of: ".", with: ",")
 		let averageRunMinutePerKM = mapAverageMinutePerKM(averageMovingTime: model.runAverageMovingTime, averageDistance: model.runAverageDistance)
 		let totalDistance = (model.runTotalDistance / 1000).round(with: 2).replacingOccurrences(of: ".", with: ",")
-		return DetailedUserModel(name: name, hasData: model.runTotalActivities > 0, totalRuns: totalRuns, averageRunDistance: averageRunDistance, averageRunMinutePerKM: averageRunMinutePerKM, totalRunDistance: totalDistance)
+		return DetailedUserModel(name: name, hasData: true, totalRuns: totalRuns, averageRunDistance: averageRunDistance, averageRunMinutePerKM: averageRunMinutePerKM, totalRunDistance: totalDistance)
 	}
 	
 	private static func mapName(firstName: String, lastName: String) -> String {
