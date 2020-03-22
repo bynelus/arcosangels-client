@@ -28,7 +28,7 @@ final class APIController {
 			guard let strongSelf = self else { throw Abort(.badRequest) }
 			let mapped = try list.map { try strongSelf.createRefreshRequest(req: req, user: $0) }
 			return mapped.flatten(on: req)
-		}.flatMap { userSummaries in
+		}.flatMap(to: Response.self) { userSummaries in
 			return try req.client().post("https://api.netlify.com/build_hooks/5e726fd5f5621a89310045c7")
 		}.transform(to: .ok)
 	}
@@ -42,15 +42,15 @@ final class APIController {
 		return deleteAll.transform(to: .ok)
 	}
 
-	func push(_ req: Request) throws -> Future<StravaPushRequest.Payload> {
+	func push(_ req: Request) throws -> StravaPushRequest.Payload {
 		guard let challenge = req.query[String.self, at: "hub.challenge"],
 			let verifyToken = req.query[String.self, at: "hub.verify_token"],
 			verifyToken == Constants.verifyToken
 			else { throw Abort(.badRequest) }
 		
-		return try req.client().get(appUrl + Route.apiUpdate.path).map { _ in
-			return StravaPushRequest.Payload(challenge: challenge)
-		}
+		_ = try req.client().get(appUrl + Route.apiUpdate.path)
+		
+		return StravaPushRequest.Payload(challenge: challenge)
 	}
 }
 
