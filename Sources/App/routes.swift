@@ -19,4 +19,5 @@ public func routes(_ router: Router) throws {
 	router.get(Route.apiFans.path, use: apiController.fans)
 	router.get(Route.apiUpdate.path, use: apiController.update)
 	router.get(Route.apiClean.path, use: apiController.clean)
+	router.get(Route.apiPush.path, use: apiController.push)
 }

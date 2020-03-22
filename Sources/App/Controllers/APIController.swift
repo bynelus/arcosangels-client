@@ -1,13 +1,10 @@
-//
-//  JSONController.swift
-//  App
-//
-//  Created by Niels Koole on 21/03/2020.
-//
-
 import Vapor
 
 final class APIController {
+	struct Constants {
+		static let verifyToken = "DeKingsMacht12"
+	}
+	
 	func members(_ req: Request) throws -> Future<[DetailedUserModel]> {
 		return UserSummary.query(on: req)
 			.filter(\.isFan, .equal, false)
@@ -43,6 +40,17 @@ final class APIController {
 		}
 		
 		return deleteAll.transform(to: .ok)
+	}
+
+	func push(_ req: Request) throws -> Future<StravaPushRequest.Payload> {
+		guard let challenge = req.query[String.self, at: "hub.challenge"],
+			let verifyToken = req.query[String.self, at: "hub.verify_token"],
+			verifyToken == Constants.verifyToken
+			else { throw Abort(.badRequest) }
+		
+		return try req.client().get(appUrl + Route.apiUpdate.path).map { _ in
+			return StravaPushRequest.Payload(challenge: challenge)
+		}
 	}
 }
 

@@ -10,6 +10,7 @@ enum Route {
 	case apiFans
 	case apiUpdate
 	case apiClean
+	case apiPush
 	
 	var path: String {
 		switch self {
@@ -21,6 +22,7 @@ enum Route {
 		case .apiFans: return "api/fans"
 		case .apiUpdate: return "api/update"
 		case .apiClean: return "api/clean"
+		case .apiPush: return "api/push"
 		}
 	}
 }
