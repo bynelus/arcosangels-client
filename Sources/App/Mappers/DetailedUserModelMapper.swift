@@ -30,11 +30,9 @@ final class DetailedUserModelMapper {
 	}
 	
 	private static func mapAverageMinutePerKM(averageMovingTime: Double, averageDistance: Double) -> String {
-		let minutesPerKM = (averageMovingTime / 60) / (averageDistance / 1000)
-		let onlyMinutes = floor(minutesPerKM)
-		let leftOverSeconds = 60 / (minutesPerKM.remainder(dividingBy: onlyMinutes) * 100)
-		let minutes = String(format: "%02d", Int(onlyMinutes))
-		let seconds = String(format: "%02d", Int(leftOverSeconds.rounded()))
-		return minutes + ":" + seconds
+		let secondsPerKM = averageMovingTime / (averageDistance / 1000)
+		let minutes = Int(floor(secondsPerKM / 60))
+		let seconds = Int(round(secondsPerKM.remainder(dividingBy: 60)))
+		return String(format: "%02d", minutes) + ":" + String(format: "%02d", seconds)
 	}
 }
