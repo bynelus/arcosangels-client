@@ -42,15 +42,18 @@ final class APIController {
 		return deleteAll.transform(to: .ok)
 	}
 
-	func push(_ req: Request) throws -> StravaPushRequest.Payload {
+	func validatePush(_ req: Request) throws -> StravaPushRequest.Payload {
 		guard let challenge = req.query[String.self, at: "hub.challenge"],
 			let verifyToken = req.query[String.self, at: "hub.verify_token"],
 			verifyToken == Constants.verifyToken
 			else { throw Abort(.badRequest) }
 		
-		_ = try req.client().get(appUrl + Route.apiUpdate.path)
-		
 		return StravaPushRequest.Payload(challenge: challenge)
+	}
+	
+	func push(_ req: Request) throws -> HTTPStatus {
+		_ = try req.client().get(appUrl + Route.apiUpdate.path)
+		return .ok
 	}
 }
 
