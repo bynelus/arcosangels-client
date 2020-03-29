@@ -47,6 +47,6 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
 	// Migrations
 	migrations.add(migration: AddStravaUserIsFan.self, database: .psql)
 	migrations.add(migration: AddUserSummaryIsFan.self, database: .psql)
-	
+	migrations.add(migration: AddSwimToUserSummary.self, database: .psql)
     services.register(migrations)
 }

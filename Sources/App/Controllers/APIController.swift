@@ -22,6 +22,15 @@ final class APIController {
 			.all()
 			.map { $0.map { DetailedUserModelMapper.map($0) } }
 	}
+	
+	func membersSwim(_ req: Request) throws -> Future<[DetailedUserModel]> {
+		return UserSummary.query(on: req)
+			.filter(\.isFan, .equal, false)
+			.filter(\.swimTotalActivities, .greaterThan, 0)
+			.sort(\.swimTotalDistance, .descending)
+			.all()
+			.map { $0.map { DetailedUserModelMapper.map($0) } }
+	}
 
 	func fansRun(_ req: Request) throws -> Future<[DetailedUserModel]> {
 		return UserSummary.query(on: req)
@@ -37,6 +46,15 @@ final class APIController {
 			.filter(\.isFan, .equal, true)
 			.filter(\.rideTotalActivities, .greaterThan, 0)
 			.sort(\.rideTotalDistance, .descending)
+			.all()
+			.map { $0.map { DetailedUserModelMapper.map($0) } }
+	}
+	
+	func fansSwim(_ req: Request) throws -> Future<[DetailedUserModel]> {
+		return UserSummary.query(on: req)
+			.filter(\.isFan, .equal, true)
+			.filter(\.swimTotalActivities, .greaterThan, 0)
+			.sort(\.swimTotalDistance, .descending)
 			.all()
 			.map { $0.map { DetailedUserModelMapper.map($0) } }
 	}
@@ -91,32 +109,38 @@ extension APIController {
 			return try response.content.decode([StravaActivity].self)
 		}.flatMap(to: UserSummary.self) { activities in
 			
-			let running = activities.filter { $0.type == "Run" }
-			let runningDistance = running.reduce(0.0) { $0 + $1.distance }
-			let runningTime = running.reduce(0) { $0 + $1.moving_time }
-			let runningDistanceAverage = running.isEmpty ? 0.0 : runningDistance / Double(running.count)
-			let runningMovingTimeAverage = running.isEmpty ? 0.0 : Double(runningTime) / Double(running.count)
+			let mapToType: (String) -> (Int, Double, Int, Double, Double) = { type in
+				let total = activities.filter { $0.type == type }
+				let totalDistance = total.reduce(0.0) { $0 + $1.distance }
+				let totalTime = total.reduce(0) { $0 + $1.moving_time }
+				let averageDistance = total.isEmpty ? 0.0 : totalDistance / Double(total.count)
+				let averageMovingTime = total.isEmpty ? 0.0 : Double(totalTime) / Double(total.count)
+				return (total.count, totalDistance, totalTime, averageDistance, averageMovingTime)
+			}
 			
-			let ride = activities.filter { $0.type == "Ride" }
-			let rideDistance = ride.reduce(0.0) { $0 + $1.distance }
-			let rideTime = ride.reduce(0) { $0 + $1.moving_time }
-			let rideDistanceAverage = ride.isEmpty ? 0.0 : rideDistance / Double(ride.count)
-			let rideMovingTimeAverage = ride.isEmpty ? 0.0 : Double(rideTime) / Double(ride.count)
+			let run = mapToType("Run")
+			let ride = mapToType("Ride")
+			let swim = mapToType("Swim")
 			
 			return UserSummary(id: user.id,
 							   firstName: user.firstName,
 							   lastName: user.lastName,
 							   isFan: user.isFan,
-							   runTotalActivities: running.count,
-							   runTotalDistance: runningDistance,
-							   runTotalMovingTime: runningTime,
-							   runAverageDistance: runningDistanceAverage,
-							   runAverageMovingTime: runningMovingTimeAverage,
-							   rideTotalActivities: ride.count,
-							   rideTotalDistance: rideDistance,
-							   rideTotalMovingTime: rideTime,
-							   rideAverageDistance: rideDistanceAverage,
-							   rideAverageMovingTime: rideMovingTimeAverage).create(orUpdate: true, on: req)
+							   runTotalActivities: run.0,
+							   runTotalDistance: run.1,
+							   runTotalMovingTime: run.2,
+							   runAverageDistance: run.3,
+							   runAverageMovingTime: run.4,
+							   rideTotalActivities: ride.0,
+							   rideTotalDistance: ride.1,
+							   rideTotalMovingTime: ride.2,
+							   rideAverageDistance: ride.3,
+							   rideAverageMovingTime: ride.4,
+							   swimTotalActivities: swim.0,
+							   swimTotalDistance: swim.1,
+							   swimTotalMovingTime: swim.2,
+							   swimAverageDistance: swim.3,
+							   swimAverageMovingTime: swim.4).create(orUpdate: true, on: req)
 		}
 	}
 }

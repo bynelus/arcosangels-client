@@ -3,6 +3,7 @@ import Vapor
 final class DetailedUserModelMapper {
 	static func map(_ model: UserSummary) -> DetailedUserModel {
 		let name = mapName(firstName: model.firstName, lastName: model.lastName)
+		
 		let totalRuns = "\(model.runTotalActivities)"
 		let averageRunDistance = (model.runAverageDistance / 1000).round(with: 2).replacingOccurrences(of: ".", with: ",")
 		let averageRunMinutePerKM = mapAverageMinutePerKM(averageMovingTime: model.runAverageMovingTime, averageDistance: model.runAverageDistance)
@@ -13,6 +14,11 @@ final class DetailedUserModelMapper {
 		let averageRideSpeed = mapAverageKMPerHour(averageMovingTime: model.rideAverageMovingTime, averageDistance: model.rideAverageDistance)
 		let totalRideDistance = (model.rideTotalDistance / 1000).round(with: 2).replacingOccurrences(of: ".", with: ",")
 		
+		let totalSwims = "\(model.swimTotalActivities)"
+		let averageSwimDistance = (model.swimAverageDistance / 1000).round(with: 2).replacingOccurrences(of: ".", with: ",")
+		let averageSwimSpeed = mapAverageKMPerHour(averageMovingTime: model.swimAverageMovingTime, averageDistance: model.swimAverageDistance)
+		let totalSwimDistance = (model.swimTotalDistance / 1000).round(with: 2).replacingOccurrences(of: ".", with: ",")
+		
 		return DetailedUserModel(name: name,
 								 totalRuns: totalRuns,
 								 averageRunDistance: averageRunDistance,
@@ -21,7 +27,11 @@ final class DetailedUserModelMapper {
 								 totalRides: totalRides,
 								 averageRideDistance: averageRideDistance,
 								 averageRideSpeed: averageRideSpeed,
-								 totalRideDistance: totalRideDistance)
+								 totalRideDistance: totalRideDistance,
+								 totalSwims: totalSwims,
+								 averageSwimDistance: averageSwimDistance,
+								 averageSwimSpeed: averageSwimSpeed,
+								 totalSwimDistance: totalSwimDistance)
 	}
 	
 	private static func mapName(firstName: String, lastName: String) -> String {

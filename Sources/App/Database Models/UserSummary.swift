@@ -18,8 +18,14 @@ final class UserSummary: PostgreSQLModel {
 	var rideTotalMovingTime: Int
 	var rideAverageDistance: Double
 	var rideAverageMovingTime: Double
+	
+	var swimTotalActivities: Int
+	var swimTotalDistance: Double
+	var swimTotalMovingTime: Int
+	var swimAverageDistance: Double
+	var swimAverageMovingTime: Double
 
-	init(id: Int? = nil, firstName: String, lastName: String, isFan: Bool, runTotalActivities: Int, runTotalDistance: Double, runTotalMovingTime: Int, runAverageDistance: Double, runAverageMovingTime: Double, rideTotalActivities: Int, rideTotalDistance: Double, rideTotalMovingTime: Int, rideAverageDistance: Double, rideAverageMovingTime: Double) {
+	init(id: Int? = nil, firstName: String, lastName: String, isFan: Bool, runTotalActivities: Int, runTotalDistance: Double, runTotalMovingTime: Int, runAverageDistance: Double, runAverageMovingTime: Double, rideTotalActivities: Int, rideTotalDistance: Double, rideTotalMovingTime: Int, rideAverageDistance: Double, rideAverageMovingTime: Double, swimTotalActivities: Int, swimTotalDistance: Double, swimTotalMovingTime: Int, swimAverageDistance: Double, swimAverageMovingTime: Double) {
         self.id = id
         self.firstName = firstName
 		self.lastName = lastName
@@ -36,6 +42,12 @@ final class UserSummary: PostgreSQLModel {
 		self.rideTotalMovingTime = rideTotalMovingTime
 		self.rideAverageDistance = rideAverageDistance
 		self.rideAverageMovingTime = rideAverageMovingTime
+		
+		self.swimTotalActivities = swimTotalActivities
+        self.swimTotalDistance = swimTotalDistance
+		self.swimTotalMovingTime = swimTotalMovingTime
+		self.swimAverageDistance = swimAverageDistance
+		self.swimAverageMovingTime = swimAverageMovingTime
 	}
 }
 
