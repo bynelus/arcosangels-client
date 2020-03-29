@@ -6,8 +6,10 @@ enum Route {
 	case fansConnect
 	case fansCallback
 	
-	case apiMembers
-	case apiFans
+	case apiMembersRun
+	case apiMembersRide
+	case apiFansRun
+	case apiFansRide
 	case apiUpdate
 	case apiClean
 	case apiPush
@@ -18,8 +20,10 @@ enum Route {
 		case .membersCallback: return "members/callback"
 		case .fansConnect: return "fans/connect"
 		case .fansCallback: return "fans/callback"
-		case .apiMembers: return "api/members"
-		case .apiFans: return "api/fans"
+		case .apiMembersRun: return "api/members/run"
+		case .apiMembersRide: return "api/members/ride"
+		case .apiFansRun: return "api/fans/run"
+		case .apiFansRide: return "api/fans/ride"
 		case .apiUpdate: return "api/update"
 		case .apiClean: return "api/clean"
 		case .apiPush: return "api/push"

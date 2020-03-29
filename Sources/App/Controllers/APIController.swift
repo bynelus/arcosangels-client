@@ -5,18 +5,38 @@ final class APIController {
 		static let verifyToken = "DeKingsMacht12"
 	}
 	
-	func members(_ req: Request) throws -> Future<[DetailedUserModel]> {
+	func membersRun(_ req: Request) throws -> Future<[DetailedUserModel]> {
 		return UserSummary.query(on: req)
 			.filter(\.isFan, .equal, false)
+			.filter(\.runTotalActivities, .greaterThan, 0)
 			.sort(\.runTotalDistance, .descending)
 			.all()
 			.map { $0.map { DetailedUserModelMapper.map($0) } }
 	}
+	
+	func membersRide(_ req: Request) throws -> Future<[DetailedUserModel]> {
+		return UserSummary.query(on: req)
+			.filter(\.isFan, .equal, false)
+			.filter(\.rideTotalActivities, .greaterThan, 0)
+			.sort(\.rideTotalDistance, .descending)
+			.all()
+			.map { $0.map { DetailedUserModelMapper.map($0) } }
+	}
 
-	func fans(_ req: Request) throws -> Future<[DetailedUserModel]> {
+	func fansRun(_ req: Request) throws -> Future<[DetailedUserModel]> {
 		return UserSummary.query(on: req)
 			.filter(\.isFan, .equal, true)
+			.filter(\.runTotalActivities, .greaterThan, 0)
 			.sort(\.runTotalDistance, .descending)
+			.all()
+			.map { $0.map { DetailedUserModelMapper.map($0) } }
+	}
+	
+	func fansRide(_ req: Request) throws -> Future<[DetailedUserModel]> {
+		return UserSummary.query(on: req)
+			.filter(\.isFan, .equal, true)
+			.filter(\.rideTotalActivities, .greaterThan, 0)
+			.sort(\.rideTotalDistance, .descending)
 			.all()
 			.map { $0.map { DetailedUserModelMapper.map($0) } }
 	}

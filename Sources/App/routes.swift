@@ -15,8 +15,10 @@ public func routes(_ router: Router) throws {
 	
 	// API
 	let apiController = APIController()
-	router.get(Route.apiMembers.path, use: apiController.members)
-	router.get(Route.apiFans.path, use: apiController.fans)
+	router.get(Route.apiMembersRun.path, use: apiController.membersRun)
+	router.get(Route.apiMembersRide.path, use: apiController.membersRide)
+	router.get(Route.apiFansRun.path, use: apiController.fansRun)
+	router.get(Route.apiFansRide.path, use: apiController.fansRide)
 	router.get(Route.apiUpdate.path, use: apiController.update)
 	router.get(Route.apiClean.path, use: apiController.clean)
 	router.get(Route.apiPush.path, use: apiController.validatePush)
