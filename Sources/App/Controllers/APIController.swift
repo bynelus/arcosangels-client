@@ -103,7 +103,7 @@ extension APIController {
 		}).flatMap(to: StravaRefreshTokenRequest.Result.self) { response in
 			return try response.content.decode(StravaRefreshTokenRequest.Result.self)
 		}.flatMap(to: Response.self) { content in
-			let url = "https://www.strava.com/api/v3/athlete/activities?after=1577836800&before=1609459200&per_page=200"
+			let url = "https://www.strava.com/api/v3/athlete/activities?after=1609455600&before=1640991599&per_page=200"
 			return try req.client().get(url, headers: ["Authorization": "Bearer " + content.access_token])
 		}.flatMap(to: [StravaActivity].self) { response in
 			return try response.content.decode([StravaActivity].self)
