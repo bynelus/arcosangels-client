@@ -43,6 +43,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
 	// Create initial models
 //    migrations.add(model: StravaUser.self, database: .psql)
 //	migrations.add(model: UserSummary.self, database: .psql)
+    
+    StravaUser.defaultDatabase = .psql
+    UserSummary.defaultDatabase = .psql
 	
 	// Migrations
 	migrations.add(migration: AddStravaUserIsFan.self, database: .psql)
